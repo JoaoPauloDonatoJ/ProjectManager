@@ -14,47 +14,39 @@ namespace ProjectMannager.API.Controllers
     {
         public readonly AppDbContext _context;
         public readonly ITokenService _tokenService;
+        public readonly IAuthService _authService;
 
-        public AuthController(AppDbContext context, ITokenService tokenService)
+        public AuthController(AppDbContext context, ITokenService tokenService, IAuthService authService)
         {
             _context = context;
             _tokenService = tokenService;
+            _authService = authService;
         }
 
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            if(await _context.Users.AnyAsync(u => u.Email == registerDto.Email))
-                return BadRequest("Email já se encontra em uso !");
+            var result = await _authService.RegisterAsync(registerDto);
 
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
-
-            var user = new User
+            if (!result.Success)
             {
-                UserName = registerDto.Username,
-                Email = registerDto.Email,
-                PasswordHash = passwordHash
-            };
+                return BadRequest(result.Message);
+            }
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return Ok( new {message = "Usuário registrado com sucesso !"});
+            return Ok( new {message = result.Message});
         }
 
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+            var result = await _authService.LoginAsync(loginDto);
 
-            if(user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
+            if(!result.Success)
             {
-                return Unauthorized("Email ou senha inválidos !");
+                return Unauthorized(new { error = result.Message });
             }
 
-            var token = _tokenService.GenerateToken(user);
-
-            return Ok(new { token });
+            return Ok(result.Data);
         }
     }
 }
