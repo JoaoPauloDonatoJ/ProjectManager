@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProjectMannager.API.Data;
+using ProjectMannager.API.Services;
 using Scalar.AspNetCore;
 using System.Text;
 
@@ -11,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // 2. CORS Configuration
 builder.Services.AddCors(options =>
