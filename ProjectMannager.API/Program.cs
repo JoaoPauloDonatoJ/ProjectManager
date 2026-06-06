@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProjectMannager.API.Data;
+using ProjectMannager.API.Repositories.Implementations;
+using ProjectMannager.API.Repositories.Interfaces;
 using ProjectMannager.API.Services;
 using Scalar.AspNetCore;
 using System.Text;
@@ -13,6 +15,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+// 1. Repositórios (Infraestrutura de Banco de Dados)
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>)); // Registro do Genérico
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
