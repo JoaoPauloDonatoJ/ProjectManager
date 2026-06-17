@@ -7,6 +7,9 @@ using ProjectMannager.API.Repositories.Interfaces;
 using ProjectMannager.API.Services;
 using Scalar.AspNetCore;
 using System.Text;
+using Microsoft.AspNetCore.Authorization; // Importante para mapear o [Authorize]
+using ProjectMannager.API.Infrastructure; // Adicione isso no topo do Program.cs
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,8 +64,22 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddControllers();
 
-// 6. OpenAPI Limpo e Nativo (Sem customizações que geram erros)
-builder.Services.AddOpenApi();
+// 6. OpenAPI Configurado para mapear [Authorize] nativamente no .NET 10
+//builder.Services.AddOpenApi(options =>
+//{
+//    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+//});
+
+// 6. OpenAPI Configurado nativamente para o .NET 10
+builder.Services.AddOpenApi(options =>
+{
+    // Registra a definição do Token nos componentes
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+
+    // Registra o filtro inteligente por endpoint
+    options.AddOperationTransformer<AuthOperationTransformer>();
+});
+
 
 var app = builder.Build();
 
@@ -73,14 +90,13 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 
-    // Configuração limpa do Scalar ignorando a geração de comentários XML
     app.MapScalarApiReference(options =>
     {
         options.WithTitle("TaskFlow API Documentation")
                .WithTheme(ScalarTheme.DeepSpace)
                .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
 
-        // Força o Scalar a ler apenas o JSON puro nativo do .NET 10
+        // O .NET 10 gera o JSON na rota padrão automaticamente
         options.OpenApiRoutePattern = "/openapi/v1.json";
     });
 }
