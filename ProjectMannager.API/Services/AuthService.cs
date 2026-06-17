@@ -10,19 +10,16 @@ namespace ProjectMannager.API.Services
 {
     public class AuthService : IAuthService
     {
-        public readonly AppDbContext _context;
         public readonly ITokenService _tokenService;
         private readonly IUserRepository _userRepository;
-        public AuthService(AppDbContext context, ITokenService tokenService, IUserRepository userRepository) 
+        public AuthService(ITokenService tokenService, IUserRepository userRepository) 
         {
-            _context = context;
             _tokenService = tokenService;
             _userRepository = userRepository;
         }
 
         public async Task<ServiceResult> RegisterAsync(RegisterDto registerDto)
         {
-            //if (await _context.Users.AnyAsync(u => u.Email == registerDto.Email))
             if (await _userRepository.EmailExistsAsync(registerDto.Email))
                 return ServiceResult.Failure("Email já se encontra em uso !");
 
@@ -32,12 +29,11 @@ namespace ProjectMannager.API.Services
             {
                 UserName = registerDto.Username,
                 Email = registerDto.Email,
-                PasswordHash = passwordHash
+                PasswordHash = passwordHash,
+                CreatedAt = DateTime.Now
             };
 
-            //_context.Users.Add(user);
             await _userRepository.AddAsync(user);
-            //await _context.SaveChangesAsync();
             await _userRepository.SaveChangesAsync();
 
             return ServiceResult.Ok("Usuário registrado com sucesso !");
@@ -45,7 +41,6 @@ namespace ProjectMannager.API.Services
 
         public async Task<ServiceResult<AuthResponseDto>> LoginAsync(LoginDto loginDto)
         {
-            //var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
             var user = await _userRepository.GetByEmailAsync(loginDto.Email);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))

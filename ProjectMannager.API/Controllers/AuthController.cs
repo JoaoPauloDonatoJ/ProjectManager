@@ -12,13 +12,12 @@ namespace ProjectMannager.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        public readonly AppDbContext _context;
+        
         public readonly ITokenService _tokenService;
         public readonly IAuthService _authService;
 
-        public AuthController(AppDbContext context, ITokenService tokenService, IAuthService authService)
+        public AuthController(ITokenService tokenService, IAuthService authService)
         {
-            _context = context;
             _tokenService = tokenService;
             _authService = authService;
         }

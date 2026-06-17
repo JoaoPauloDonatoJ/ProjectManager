@@ -9,7 +9,9 @@ namespace ProjectMannager.API.Data
         {
 
         }
-        public DbSet<User> Users { get; set; }
+        public DbSet<User> Users => Set<User>();
+        public DbSet<Workspace> Workspaces => Set<Workspace>();
+        public DbSet<Board> Boards => Set<Board>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +36,29 @@ namespace ProjectMannager.API.Data
                 .Property(u => u.PasswordHash)
                 .IsRequired()
                 .HasMaxLength(255);
+
+            modelBuilder.Entity<Workspace>(entity =>
+            {
+                entity.Property(w => w.Name).IsRequired().HasMaxLength(100);
+                entity.Property(w => w.Description).HasMaxLength(500);
+
+                // Relacionamento User (1) -> Workspace (N)
+                entity.HasOne(w => w.User)
+                    .WithMany(u => u.Workspaces)
+                    .HasForeignKey(w => w.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Board>(entity =>
+            {
+                entity.Property(b => b.Name).IsRequired().HasMaxLength(100);
+
+                // Relacionamento Workspace (1) -> Board (N)
+                entity.HasOne(b => b.Workspace)
+                    .WithMany(w => w.Boards)
+                    .HasForeignKey(b => b.WorkspaceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
         }
     }
