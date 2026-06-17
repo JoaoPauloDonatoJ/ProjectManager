@@ -20,5 +20,7 @@ namespace ProjectMannager.API.Entities
         public string PasswordHash  { get; set; }
 
         public DateTime CreatedAt  { get; set; } = DateTime.Now;
+
+        public ICollection<Workspace> Workspaces { get; set; } = new List<Workspace>();
     }
 }
