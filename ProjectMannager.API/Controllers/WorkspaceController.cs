@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace ProjectMannager.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/workspaces")]
     public class WorkspaceController : ControllerBase
     {
         private readonly IWorkspaceService _workspaceService;
@@ -48,7 +48,18 @@ namespace ProjectMannager.API.Controllers
             if (!result.Success)
                 return BadRequest(new { error = result.Message });
 
-            return Ok(result.Data);
+            // Retorna HTTP 201 Created
+            // 1º parâmetro: Nome do método que busca o recurso por ID
+            // 2º parâmetro: Objeto anônimo com o parâmetro de rota que o método de busca espera (id)
+            // 3º parâmetro: O objeto com os dados criados (result.Data)
+            return CreatedAtAction(nameof(GetWorkspaceById), new { id = result.Data.Id }, result.Data);
+        }
+
+        [Authorize]
+        [HttpGet("{id:int}")] // Rota necessária para o CreatedAtAction funcionar
+        public async Task<IActionResult> GetWorkspaceById(int id)
+        {
+            return Ok();
         }
 
         // Método auxiliar privado para centralizar a extração e parsing do ID do Token
