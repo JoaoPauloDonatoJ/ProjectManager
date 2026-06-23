@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ProjectMannager.API.Infrastructure;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProjectMannager.API.Entities
 {
-    public class User
+    public class User : BaseEntity
     {
         [Key]
         public int Id { get; set; }
@@ -19,7 +20,7 @@ namespace ProjectMannager.API.Entities
         [Required(ErrorMessage = "A senha é obrigatória.")]
         public string PasswordHash  { get; set; }
 
-        public DateTime CreatedAt  { get; set; } = DateTime.Now;
+        //public DateTime CreatedAt  { get; set; } = DateTime.Now;
 
         public ICollection<Workspace> Workspaces { get; set; } = new List<Workspace>();
     }

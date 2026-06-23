@@ -9,7 +9,7 @@ using BCrypt.Net;
 namespace ProjectMannager.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         
@@ -29,10 +29,12 @@ namespace ProjectMannager.API.Controllers
 
             if (!result.Success)
             {
-                return BadRequest(result.Message);
+                return BadRequest(new { error = result.Message });
             }
 
-            return Ok( new {message = result.Message});
+            // Retorna HTTP 201 Created para criação de recursos
+            // Como não há um GET de usuário exposto aqui, passamos a URI string vazia ""
+            return Created(string.Empty, new { message = result.Message });
         }
 
         [HttpPost("login")]

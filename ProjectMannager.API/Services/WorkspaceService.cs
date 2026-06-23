@@ -5,19 +5,27 @@ using ProjectMannager.API.Repositories.Interfaces;
 
 namespace ProjectMannager.API.Services
 {
-    public class WorkspaceService(IWorkspaceRepository workspaceRepository) : IWorkspaceService
+    public class WorkspaceService(IWorkspaceRepository _workspaceRepository, IUserRepository _userRepository) : IWorkspaceService
     {
         public async Task<ServiceResult<WorkspaceResponseDto>> CreateAsync(CreateWorkspaceDto dto, int userId)
         {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                return ServiceResult<WorkspaceResponseDto>.Failure("Erro ao obter o id do usuário");
+            }
+
             var workspace = new Workspace
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                UserId = userId
+                UserId = userId,
+                CreatedByName = user.UserName
             };
 
-            await workspaceRepository.AddAsync(workspace);
-            await workspaceRepository.SaveChangesAsync();
+            await _workspaceRepository.AddAsync(workspace);
+            await _workspaceRepository.SaveChangesAsync();
 
             var response = new WorkspaceResponseDto(workspace.Id, workspace.Name, workspace.Description, workspace.UserId);
             return ServiceResult<WorkspaceResponseDto>.Ok(response, "Workspace criado com sucesso.");
@@ -25,7 +33,7 @@ namespace ProjectMannager.API.Services
 
         public async Task<ServiceResult<IEnumerable<WorkspaceResponseDto>>> GetUserWorkspacesAsync(int userId)
         {
-            var workspaces = await workspaceRepository.GetByUserIdAsync(userId);
+            var workspaces = await _workspaceRepository.GetByUserIdAsync(userId);
 
             var response = workspaces.Select(w => new WorkspaceResponseDto(w.Id, w.Name, w.Description, w.UserId));
 

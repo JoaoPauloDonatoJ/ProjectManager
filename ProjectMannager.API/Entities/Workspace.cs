@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Primitives;
+using ProjectMannager.API.Infrastructure;
 using System.ComponentModel.DataAnnotations;
 
 
 namespace ProjectMannager.API.Entities
 {
-    public class Workspace
+    public class Workspace : BaseEntity
     {
         [Key]
         public int Id { get; set; }

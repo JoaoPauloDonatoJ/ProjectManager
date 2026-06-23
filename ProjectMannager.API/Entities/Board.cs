@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ProjectMannager.API.Infrastructure;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProjectMannager.API.Entities
 {
-    public class Board
+    public class Board : BaseEntity
     {
         [Key]
         public int Id { get; set; }
