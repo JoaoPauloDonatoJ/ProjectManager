@@ -2,7 +2,7 @@
 {
     public abstract class BaseEntity
     {
-        public string InternalControl { get; set; } = string.Empty;
+        public string? InternalControl { get; set; }
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;

@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ProjectMannager.API.Services;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using ProjectMannager.API.DTOs;
-using Microsoft.AspNetCore.Authorization;
+using ProjectMannager.API.Services;
 using System.Security.Claims;
 
 namespace ProjectMannager.API.Controllers
@@ -11,10 +12,12 @@ namespace ProjectMannager.API.Controllers
     public class WorkspaceController : ControllerBase
     {
         private readonly IWorkspaceService _workspaceService;
+        private readonly IBoardService _boardService;
 
-        public WorkspaceController(IWorkspaceService workspaceService)
+        public WorkspaceController(IWorkspaceService workspaceService, IBoardService boardService)
         {
             _workspaceService = workspaceService;
+            _boardService = boardService;
         }
 
         [Authorize]
@@ -58,6 +61,31 @@ namespace ProjectMannager.API.Controllers
         [Authorize]
         [HttpGet("{id:int}")] // Rota necessária para o CreatedAtAction funcionar
         public async Task<IActionResult> GetWorkspaceById(int id)
+        {
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("{workspaceId:int}/boards")]
+        public async Task<IActionResult> CreatedBoard([FromBody] CreateBoardDto createBoardDto, int workspaceId)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+                return Unauthorized(new { error = "Ocorreu um erro ao tentar obter o ID do usuário." });
+
+            var result = await _boardService.CreateBoardAsync(createBoardDto, workspaceId, userId.Value);
+
+            if (!result.Success)
+                return BadRequest(new { error = result.Message });
+
+            return CreatedAtAction(nameof(GetBoardById), new { id = result.Data.Id }, result.Data);
+
+        }
+
+        [Authorize]
+        [HttpGet("{id:int}")] // Rota necessária para o CreatedAtAction funcionar
+        public async Task<IActionResult> GetBoardById(int id)
         {
             return Ok();
         }
