@@ -22,12 +22,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
+builder.Services.AddScoped<IBoardRepository, BoardRepository>();
 
 // 3. Serviços
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
-
+builder.Services.AddScoped<IBoardService, BoardService>();
 // 4. CORS Configuration
 builder.Services.AddCors(options =>
 {
