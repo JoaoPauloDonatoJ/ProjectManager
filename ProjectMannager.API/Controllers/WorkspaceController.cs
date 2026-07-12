@@ -79,16 +79,15 @@ namespace ProjectMannager.API.Controllers
             if (!result.Success)
                 return BadRequest(new { error = result.Message });
 
-            return CreatedAtAction(nameof(GetBoardById), new { id = result.Data.Id }, result.Data);
+            return CreatedAtAction(
+                "GetBoardById",
+                "Board",
+                new { id = result.Data.Id },
+                result.Data
+            );
 
         }
 
-        [Authorize]
-        [HttpGet("{id:int}")] // Rota necessária para o CreatedAtAction funcionar
-        public async Task<IActionResult> GetBoardById(int id)
-        {
-            return Ok();
-        }
 
         // Método auxiliar privado para centralizar a extração e parsing do ID do Token
         private int? GetUserId()
