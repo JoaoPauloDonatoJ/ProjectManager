@@ -87,6 +87,22 @@ namespace ProjectMannager.API.Controllers
             );
 
         }
+        [Authorize]
+        [HttpGet("{workspaceId:int}/boards")]
+        public async Task<IActionResult> GetWorkspaceBoards(int workspaceId)
+        {
+            var userId = GetUserId();
+
+            if (userId == null)
+                return Unauthorized(new { error = "Ocorreu um erro ao tentar obter o ID do usuário." });
+
+            var result = await _boardService.GetWorkspaceBoardsAsync(workspaceId, userId.Value);
+
+            if (!result.Success)
+                return BadRequest(new { error = result.Message });
+
+            return Ok(result.Data);
+        }
 
 
         // Método auxiliar privado para centralizar a extração e parsing do ID do Token
