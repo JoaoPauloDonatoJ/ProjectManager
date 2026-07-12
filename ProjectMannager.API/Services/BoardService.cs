@@ -45,10 +45,35 @@ namespace ProjectMannager.API.Services
             return ServiceResult<BoardResponseDto>.Ok(response);
         }
 
-        public async Task<ServiceResult<IEnumerable<BoardResponseDto>>> GetWorkspaceBoardsAsync(int workspaceId)
+        public async Task<ServiceResult<IEnumerable<BoardResponseDto>>> GetWorkspaceBoardsAsync(int workspaceId, int userId)
         {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                return ServiceResult<IEnumerable<BoardResponseDto>>.Failure("Usuário não encontrado.");
+            }
+
+            var workspace = await _workspaceRepository.GetByIdAsync(workspaceId);
+
+            if (workspace == null)
+            {
+                return ServiceResult<IEnumerable<BoardResponseDto>>.Failure("Workspace não encontrado.");
+            }
+
+            // 🔐 Validação Crítica de Segurança:
+            if (workspace.UserId != userId)
+            {
+                return ServiceResult<IEnumerable<BoardResponseDto>>.Failure("Você não tem permissão para acessar os Boards deste Workspace.");
+            }
+
             var boards = await _boardRepository.GetByWorkspaceIdAsync(workspaceId);
-            
+
+            //if (!boards.Any())
+            //{
+            //    return ServiceResult<IEnumerable<BoardResponseDto>>.Failure("Nenhum Board encontrado para este Workspace.");
+            //}
+
             var response = boards.Select(b => new BoardResponseDto(b.Id, b.Name, b.Description, b.WorkspaceId));
 
             return ServiceResult<IEnumerable<BoardResponseDto>>.Ok(response);

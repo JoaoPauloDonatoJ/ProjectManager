@@ -6,6 +6,6 @@ namespace ProjectMannager.API.Services
     public interface IBoardService
     {
         Task<ServiceResult<BoardResponseDto>> CreateBoardAsync(CreateBoardDto dto,int workspaceId, int userId);
-        Task<ServiceResult<IEnumerable<BoardResponseDto>>> GetWorkspaceBoardsAsync(int workspaceId);
+        Task<ServiceResult<IEnumerable<BoardResponseDto>>> GetWorkspaceBoardsAsync(int workspaceId, int userId);
     }
 }
