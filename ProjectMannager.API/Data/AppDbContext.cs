@@ -13,6 +13,7 @@ namespace ProjectMannager.API.Data
         public DbSet<User> Users => Set<User>();
         public DbSet<Workspace> Workspaces => Set<Workspace>();
         public DbSet<Board> Boards => Set<Board>();
+        public DbSet<Column> Columns => Set<Column>();
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -85,6 +86,16 @@ namespace ProjectMannager.API.Data
                 entity.HasOne(b => b.Workspace)
                     .WithMany(w => w.Boards)
                     .HasForeignKey(b => b.WorkspaceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Column>(entity =>
+            {
+                entity.Property(c => c.Name).IsRequired().HasMaxLength(100);
+
+                entity.HasOne(c => c.Board)
+                    .WithMany(b => b.Columns)
+                    .HasForeignKey(c => c.BoardId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
