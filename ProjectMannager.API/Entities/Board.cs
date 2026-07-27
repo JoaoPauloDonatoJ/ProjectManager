@@ -13,5 +13,6 @@ namespace ProjectMannager.API.Entities
         public string? Description { get; set; }
         public int WorkspaceId { get; set; }
         public Workspace? Workspace { get; set; }
+        public ICollection<Column> Columns { get; set; } = new List<Column>();
     }
 }

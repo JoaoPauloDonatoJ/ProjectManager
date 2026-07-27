@@ -11,9 +11,16 @@ namespace ProjectMannager.API.Repositories.Implementations
         {
             return await _context.Boards
             .Include(w => w.Workspace)
-            //.Where(w => w.UserId == userId)
             .Where(w => w.WorkspaceId == workspaceId)
             .ToListAsync();
+        }
+
+        
+        public async Task<Board> GetByIdWithWorkspaceAsync(int boardId)
+        {
+            return await _context.Boards
+                .Include(b => b.Workspace)
+                .FirstOrDefaultAsync(b => b.Id == boardId);
         }
     }
 }

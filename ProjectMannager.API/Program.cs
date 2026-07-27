@@ -23,12 +23,14 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
+builder.Services.AddScoped<IColumnRepository, ColumnRepository>();
 
 // 3. Serviços
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<IColumnService, ColumnService>();
 // 4. CORS Configuration
 builder.Services.AddCors(options =>
 {
