@@ -15,6 +15,12 @@ namespace ProjectMannager.API.Repositories.Implementations
                 .Where(c => c.BoardId == boardId)
                 .ToListAsync();
         }
+
+        public async Task<int> CountByBoardIdAsync(int boardId)
+        {
+            return await _context.Columns
+                .CountAsync(c => c.BoardId == boardId);
+        }
     }
 }
 
