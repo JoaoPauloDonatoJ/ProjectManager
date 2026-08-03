@@ -39,6 +39,7 @@ namespace ProjectMannager.API.Services
                 Name = dto.Name,
                 BoardId = boardId,
                 Position = countColumn, // Set the position based on the existing columns in the board
+                CreatedByName = user.UserName
             };
 
             await _columnRepository.AddAsync(newColumn);
