@@ -46,6 +46,20 @@ namespace ProjectMannager.API.Controllers
             return Ok();
         }
 
+        [Authorize]
+        [HttpGet("{boardId:int}/columns")]
+        public async Task<IActionResult> GetColumnsByBoardIdAsync(int boardId)
+        {
+            var userId = GetUserId();
+
+            var result = await _columnService.GetColumnsBoardIdAsync(boardId, userId.Value);
+
+            if (!result.Success)
+                return BadRequest(new { error = result.Message });
+
+            return Ok(result.Data);
+        }
+
         // Método auxiliar privado para centralizar a extração e parsing do ID do Token
         private int? GetUserId()
         {
