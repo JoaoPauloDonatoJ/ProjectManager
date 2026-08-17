@@ -48,5 +48,81 @@ namespace ProjectMannager.API.Services
             var response = new ColumnResponseDto(newColumn.Id, newColumn.Name, newColumn.Position, newColumn.BoardId);
             return ServiceResult<ColumnResponseDto>.Ok(response);
         }
+
+        public async Task<ServiceResult<IEnumerable<ColumnResponseDto>>> GetColumnsBoardIdAsync(int boardId, int userId)
+        {
+            var board = await _boardRepository.GetByIdWithWorkspaceAsync(boardId);
+
+            if (board == null)
+            {
+                return ServiceResult<IEnumerable<ColumnResponseDto>>.Failure("Board não encontrado.");
+            }
+
+            // 2. 🔐 Validação Crítica de Segurança
+            if (board.Workspace.UserId != userId)
+            {
+                return ServiceResult<IEnumerable<ColumnResponseDto>>.Failure("Você não tem permissão para acessar os Boards deste Workspace.");
+            }
+
+            var columns = await _columnRepository.GetByBoardIdAsync(boardId);
+
+            var response = columns.Select(c => new ColumnResponseDto(c.Id, c.Name, c.Position, c.BoardId));
+
+            return ServiceResult<IEnumerable<ColumnResponseDto>>.Ok(response);
+        }
+
+        public async Task<ServiceResult<ColumnResponseDto>> UpdateColumnAsync(int columnId, UpdateColumnDto dto, int userId)
+        {
+            var column = await _columnRepository.GetByIdWithBoardAndWorkspaceAsync(columnId);
+
+            if (column == null)
+            {
+                return ServiceResult<ColumnResponseDto>.Failure("Coluna não encontrada.");
+            }
+
+            // 2. Validação de Segurança
+            if (column.Board.Workspace.UserId != userId)
+            {
+                return ServiceResult<ColumnResponseDto>.Failure("Você não tem permissão para atualizar esta coluna.");
+            }
+
+            column.Name = dto.Name;
+            column.Position = dto.Position;
+
+            _columnRepository.Update(column);
+            await _columnRepository.SaveChangesAsync();
+
+            var response = new ColumnResponseDto(
+                column.Id,
+                column.Name,
+                column.Position,
+                column.BoardId
+            );
+
+            return ServiceResult<ColumnResponseDto>.Ok(response);
+        }
+
+        public async Task<ServiceResult<ColumnResponseDto>> GetColumnByIdAsync(int columnId, int userId)
+        {
+            var column = await _columnRepository.GetByIdWithBoardAndWorkspaceAsync(columnId);
+
+            if (column == null)
+            {
+                return ServiceResult<ColumnResponseDto>.Failure("Coluna não encontrada.");
+            }
+            // 2. Validação de Segurança
+            if (column.Board.Workspace.UserId != userId)
+            {
+                return ServiceResult<ColumnResponseDto>.Failure("Você não tem permissão para acessar esta coluna.");
+            }
+
+            var response = new ColumnResponseDto(
+                column.Id,
+                column.Name,
+                column.Position,
+                column.BoardId
+            );
+            return ServiceResult<ColumnResponseDto>.Ok(response);
+        }
     }
 }

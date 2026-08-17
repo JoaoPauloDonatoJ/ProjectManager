@@ -4,4 +4,5 @@
 
     public record ColumnResponseDto(int Id, string Name, int Position, int BoardId);
 
+    public record UpdateColumnDto(string Name, int Position);
 }

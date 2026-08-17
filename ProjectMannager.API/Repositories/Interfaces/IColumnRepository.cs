@@ -7,5 +7,8 @@ namespace ProjectMannager.API.Repositories.Interfaces
         Task<IEnumerable<Column>> GetByBoardIdAsync(int boardId);
 
         Task<int> CountByBoardIdAsync(int boardId);
+
+        Task<Column?> GetByIdWithBoardAndWorkspaceAsync(int columnId);
+
     }
 }

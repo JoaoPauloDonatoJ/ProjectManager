@@ -13,6 +13,7 @@ namespace ProjectMannager.API.Repositories.Implementations
             return await _context.Columns
                 .Include(c => c.Board)
                 .Where(c => c.BoardId == boardId)
+                .OrderBy(c => c.Position)
                 .ToListAsync();
         }
 
@@ -21,6 +22,16 @@ namespace ProjectMannager.API.Repositories.Implementations
             return await _context.Columns
                 .CountAsync(c => c.BoardId == boardId);
         }
+
+        public async Task<Column?> GetByIdWithBoardAndWorkspaceAsync(int columnId)
+        {
+             var column = await _context.Columns
+                .Include(c => c.Board)
+                .ThenInclude(b => b.Workspace)
+                .FirstOrDefaultAsync(c => c.Id == columnId);
+
+            return column;
+        }  
     }
 }
 
