@@ -35,9 +35,12 @@ namespace ProjectMannager.API.Controllers
 
         [Authorize]
         [HttpPut("{columnId:int}")]
-        public async Task<IActionResult> UpdateColumnAsync([FromBody] UpdateColumnDto dto, int columnId)
+        public async Task<IActionResult> UpdateColumnAsync(int columnId, UpdateColumnDto dto)
         {
             var userId = GetUserId();
+
+            if (!userId.HasValue)
+                return Unauthorized();
 
             var result = await _columnService.UpdateColumnAsync(columnId, dto, userId.Value);
 
