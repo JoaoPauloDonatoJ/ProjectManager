@@ -34,6 +34,11 @@ namespace ProjectMannager.API.Services
 
             var countColumn = await _columnRepository.CountByBoardIdAsync(boardId);
 
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return ServiceResult<ColumnResponseDto>.Failure("O nome da coluna é obrigatório e não pode conter apenas espaços.");
+            }
+
             var newColumn = new Column
             {
                 Name = dto.Name,
@@ -80,26 +85,73 @@ namespace ProjectMannager.API.Services
                 return ServiceResult<ColumnResponseDto>.Failure("Coluna não encontrada.");
             }
 
-            // 2. Validação de Segurança
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return ServiceResult<ColumnResponseDto>.Failure("O nome da coluna é obrigatório.");
+            }
+
             if (column.Board.Workspace.UserId != userId)
             {
                 return ServiceResult<ColumnResponseDto>.Failure("Você não tem permissão para atualizar esta coluna.");
             }
 
+            var positionBefore = column.Position;
+            var positionAfter = dto.Position;
+
+            // Se a posição não mudou, apenas atualiza o nome
+            if (positionBefore == positionAfter)
+            {
+                column.Name = dto.Name;
+                _columnRepository.Update(column);
+                await _columnRepository.SaveChangesAsync();
+
+                return ServiceResult<ColumnResponseDto>.Ok(new ColumnResponseDto(column.Id, column.Name, column.Position, column.BoardId));
+            }
+
+            // Busca todas as colunas do Board
+            var boardColumns = (await _columnRepository.GetByBoardIdAsync(column.BoardId)).ToList();
+
+            if (positionAfter < 1 || positionAfter > boardColumns.Count)
+            {
+                return ServiceResult<ColumnResponseDto>.Failure("A posição da coluna é inválida.");
+            }
+
+            // Reordena apenas as colunas vizinhas (excluindo a própria coluna que está sendo movida)
+            foreach (var boardColumn in boardColumns.Where(c => c.Id != columnId))
+            {
+                // Cenário A: Mover para CIMA (ex: de 4 para 2)
+                if (positionAfter < positionBefore)
+                {
+                    if (boardColumn.Position >= positionAfter && boardColumn.Position < positionBefore)
+                    {
+                        boardColumn.Position++;
+                        _columnRepository.Update(boardColumn);
+                    }
+                }
+                // Cenário B: Mover para BAIXO (ex: de 2 para 4)
+                else if (positionAfter > positionBefore)
+                {
+                    if (boardColumn.Position > positionBefore && boardColumn.Position <= positionAfter)
+                    {
+                        boardColumn.Position--;
+                        _columnRepository.Update(boardColumn);
+                    }
+                }
+            }
+
+            // Por fim, atualiza a coluna alvo
             column.Name = dto.Name;
             column.Position = dto.Position;
-
             _columnRepository.Update(column);
+
             await _columnRepository.SaveChangesAsync();
 
-            var response = new ColumnResponseDto(
+            return ServiceResult<ColumnResponseDto>.Ok(new ColumnResponseDto(
                 column.Id,
                 column.Name,
                 column.Position,
                 column.BoardId
-            );
-
-            return ServiceResult<ColumnResponseDto>.Ok(response);
+            ));
         }
 
         public async Task<ServiceResult<ColumnResponseDto>> GetColumnByIdAsync(int columnId, int userId)
