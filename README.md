@@ -4,74 +4,87 @@ A robust, enterprise-grade RESTful Web API designed to mimic core Trello and Jir
 
 ## 🚀 Technologies and Libraries
 
-* **Framework:** ASP.NET Core Web API (REST Architecture)
-* **Language Runtime:** .NET 10.0 (LTS)
-* **ORM:** Entity Framework Core
-* **Database:** SQL Server
-* **Security:** JWT (JSON Web Tokens) & Cryptographic Hashing
+- **Framework:** ASP.NET Core Web API (REST Architecture)
+- **Language Runtime:** .NET 10.0 (LTS)
+- **ORM:** Entity Framework Core
+- **Database:** SQL Server
+- **Security:** JWT (JSON Web Tokens) & Cryptographic Hashing
+- **API Documentation:** Scalar / OpenAPI (Swagger)
 
-## ✨ Key Features (Sprint 1 Foundations)
+## ✨ Key Features
 
-* **Stateless Authentication:** Secure user authentication powered by **JWT (JSON Web Tokens)** containing industry-standard claims (`sub`, `email`, `role`).
-* **Data Integrity Rules:** Strict Fluent API constraints enforcing maximum character boundaries (`nvarchar(150)`) and data uniqueness indexes directly at the database layer (e.g., Duplicate Email Prevention).
-* **Decoupled Architecture Foundations:** Native Cross-Origin Resource Sharing (CORS) security configuration implemented to isolate and securely authorize incoming HTTP traffic from frontend Single Page Applications (SPA).
-* **Cryptographic Security:** Designed to isolate raw user credentials by processing and storing passwords exclusively as secure, cryptographic hashes rather than cleartext.
+### 🔐 Authentication & Security
+- **Stateless Authentication:** Secure user authentication powered by custom **JWT (JSON Web Tokens)** containing standard claims (`sub`, `email`, `role`).
+- **Custom Security Architecture:** Built without ASP.NET Core Identity to maintain a lightweight, fully decoupled, and stateless JWT mechanism tailored for microservices/APIs.
+- **Cryptographic Hashing:** Processes and stores passwords securely using salted cryptographic hashing.
 
-## 🏗️ Architecture & Design Patterns
+### 📋 Columns Management & Reordering Algorithm
+- **1-Indexed Position Management:** Strict ordinal position enforcement ensuring columns maintain sequential index structures ($1, 2, \dots, N$).
+- **Atomic Position Shifting:** Built-in shift algorithm during `PUT` updates that automatically increments or decrements peer column positions to eliminate gaps or duplicates.
+- **Workspace Security & Scope:** Strict ownership validation ensuring users can only read, create, or reorder columns belonging to boards within their own workspace.
 
-The backend repository follows a clean, decoupled service architecture tailored for high-performance API interactions:
-* **Controller Layer:** High-level endpoint routing using specialized API Controllers to handle incoming JSON payloads, returning semantic REST HTTP responses (`200 OK`, `401 Unauthorized`, `400 Bad Request`).
-* **Data Layer:** Centralized database orchestration utilizing an isolated `AppDbContext` to map strongly-typed entity configurations via Fluent API code mappings.
+### 🛡️ Data Integrity & Architecture
+- **ServiceResult<T> Pattern:** Standardized application response wrapper decoupling HTTP status handling from core business logic.
+- **Explicit DTO Validation:** Strong schema constraints using C# Records with explicit `{ get; init; }` properties and DataAnnotations (`[Required]`, `[StringLength]`).
+- **Entity Framework Core Change Tracker:** Leverages EF Core tracking mechanism for atomic, single-transaction batch updates.
 
 ---
 
-## ⚙️ How to run the project
+## 🏗️ Architecture & Design Patterns
 
-1. **Clone the repository**
+The project follows a clean, layered architecture separating HTTP concerns from domain logic:
+
+```text
+[ Controller Layer ] -> Handles HTTP Routing, Model Binding & Status Codes
+         │
+[ Service Layer ]    -> Encapsulates Business Logic, Reordering Algorithms & Authorization
+         │
+[ Repository Layer ] -> Manages Entity Framework Data Context & Persistence Operations
+
+````
+> 📖 **Deep Dive Documentation:** For a detailed breakdown on why ASP.NET Core Identity was omitted, how the position shift algorithm works, and DTO serialization decisions, check out our [Architectural & Design Decisions Document](./docs/architecture-and-design-decisions.md).
+
+## ⚙️ How to Run the Project
+
+1. Clone the repository:
+
+```Bash
+git clone [https://github.com/JoaoPauloDonatoJ/ProjectManager.git](https://github.com/JoaoPauloDonatoJ/ProjectManager.git)
+```
+
+2. Navigate to the project folder:
+
+```Bash
+cd ProjectManager
+```
+
+3. Configure the database connection (User Secrets):
   
-    ```bash
-    git clone [https://github.com/JoaoPauloDonatoJ/ProjectManager.git](https://github.com/JoaoPauloDonatoJ/ProjectManager.git)
-    ```
+This project utilizes User Secrets to safely isolate sensitive configuration parameters from the source code.
 
-2. **Navigate to the project folder:**
-   
-   Example:
-   ```bash
-   cd ProjectManager
-    
-3. **Configure the database connection (User Secrets)**
-   
-   This project utilizes User Secrets to safely isolate sensitive configuration parameters from the source code.
-   
-   Initialize and set your SQL Server connection string:
-   ```bash
-   dotnet user-secrets init
-   ```
-   Now set your connection string:
-   ```bash
-   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "YOUR_CONNECTION_STRING"
-   ```
-   Example:
-   ```bash
-   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=YOUR_SERVER;Database=YOUR_DB;Trusted_Connection=True;TrustServerCertificate=True"
-   ```
+Initialize User Secrets:
 
-4. **Apply database migrations**
-   ```bash
-   dotnet ef database update
-   ```
-   This will create the database and tables automatically.
-   
-5. **Run the application**
-   ```bash
-   dotnet run
-   ```
-   The application bootstrapper will compile the source code and host the local HTTP/HTTPS development servers.
+```Bash
+dotnet user-secrets init
+```
 
-   You can interact with and test the endpoints directly via the generated OpenAPI/Swagger UI 
-   through the default local URL displayed in your command prompt terminal (e.g., https://localhost:7001/swagger).
+Set your SQL Server connection string:
 
-   Example Default URL:
-   ```bash
-   https://localhost:7001/swagger
-   ```
+```Bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=YOUR_SERVER;Database=YOUR_DB;Trusted_Connection=True;TrustServerCertificate=True"
+```
+4. Apply database migrations:
+
+```Bash
+dotnet ef database update
+```
+
+5. Run the application:
+
+```Bash
+dotnet run
+```
+
+Explore the API:
+
+Once running, access the interactive OpenAPI/Scalar documentation terminal in your browser (e.g., https://localhost:7099/scalar/v1).
